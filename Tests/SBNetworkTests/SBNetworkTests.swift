@@ -1,8 +1,8 @@
 import Combine
 import XCTest
-@testable import SBNetworkMonitor
+@testable import SBNetwork
 
-final class NetworkMonitorTests: XCTestCase {
+final class NetworkTests: XCTestCase {
     
     private static var storage = Set<AnyCancellable>()
     
@@ -10,17 +10,16 @@ final class NetworkMonitorTests: XCTestCase {
         storage = []
     }
     
-    // This test requires an internet connection via wifi
+    // This test requires an internet connection via wifi or wired ethernet
     func testNetworkMonitor() {
         
         let valueExpectation = expectation(description: "value")
         
-        Publishers.NetworkMonitorPublisher()
+        NWPathMonitor.Publisher()
             .sink { connection in
                 XCTAssertTrue(connection.isConnected)
                 XCTAssertFalse(connection.isConstrained)
                 XCTAssertFalse(connection.isExpensive)
-                XCTAssertFalse(connection.usesInterfaceType(.wiredEthernet))
                 XCTAssertFalse(connection.usesInterfaceType(.cellular))
                 XCTAssertFalse(connection.usesInterfaceType(.loopback))
                 XCTAssertFalse(connection.usesInterfaceType(.other))
@@ -36,7 +35,7 @@ final class NetworkMonitorTests: XCTestCase {
         
         let valueExpectation = expectation(description: "value")
         
-        Publishers.NetworkMonitorPublisher(requiredInterfaceType: .cellular)
+        NWPathMonitor.Publisher(requiredInterfaceType: .cellular)
             .sink { connection in
                 XCTAssertFalse(connection.isConnected)
                 valueExpectation.fulfill()

@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "SBNetworkMonitor",
+    name: "SBNetwork",
     platforms: [.iOS(.v12), .tvOS(.v12), .macOS(.v10_14)],
     products: [
-        .library(name: "SBNetworkMonitor", targets: ["SBNetworkMonitor"]),
+        .library(name: "SBNetwork", targets: ["SBNetwork"]),
     ],
     dependencies: [],
     targets: [
-        .target(name: "SBNetworkMonitor", dependencies: []),
-        .testTarget(name: "SBNetworkMonitorTests", dependencies: ["SBNetworkMonitor"]),
+        .target(name: "SBNetwork", dependencies: []),
+        .testTarget(name: "SBNetworkTests", dependencies: ["SBNetwork"]),
     ]
 )

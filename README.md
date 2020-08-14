@@ -1,3 +1,3 @@
-# SBNetworkMonitor
+# SBNetwork
 
-A thin wrapper around NWPathMonitor that includes a custom Combine publisher.
+Extensions to the Network framework. Includes a publisher for NWPathMonitor.
