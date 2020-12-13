@@ -4,6 +4,8 @@ import Network
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, *)
 public extension NWPathMonitor {
     
+    /// A publisher that you use to monitor and react to network changes..
+    /// - Author: Scott Brenner | SBNetwork
     struct Publisher: Combine.Publisher {
         
         public typealias Output = NWPath
@@ -28,7 +30,7 @@ public extension NWPathMonitor {
         public func receive<S>(subscriber: S)
             where S: Subscriber, Self.Failure == S.Failure, Self.Output == S.Input {
             
-            let subscription = PathSubscription(
+            let subscription = Inner(
                 subscriber: subscriber,
                 monitor: monitor,
                 queue: .global(qos: .background)
@@ -39,33 +41,34 @@ public extension NWPathMonitor {
 }
 
 @available(iOS 13.0, tvOS 13.0, macOS 10.15, *)
-fileprivate extension NWPathMonitor {
+extension NWPathMonitor.Publisher {
     
-    class PathSubscription<S: Subscriber>: Subscription
-    where S.Input == NWPath {
+    class Inner<Downstream: Subscriber>: Subscription
+    where Downstream.Input == NWPath {
             
-        private var subscriber: S?
+        private var downstream: Downstream?
         
         private let monitor: NWPathMonitor
         
-        fileprivate init(subscriber: S, monitor: NWPathMonitor, queue: DispatchQueue) {
-            self.subscriber = subscriber
+        private let queue: DispatchQueue
+        
+        fileprivate init(subscriber: Downstream, monitor: NWPathMonitor, queue: DispatchQueue) {
+            self.downstream = subscriber
             self.monitor = monitor
-            startMonitor(on: queue)
+            self.queue = queue
         }
         
-        func request(_ demand: Subscribers.Demand) { }
+        func request(_ demand: Subscribers.Demand) {
+            guard demand > 0 else { return }
+            monitor.start(queue: queue)
+            monitor.pathUpdateHandler = { [weak self] path in
+                _ = self?.downstream?.receive(path)
+            }
+        }
         
         func cancel() {
             monitor.cancel()
-            subscriber = nil
-        }
-        
-        func startMonitor(on queue: DispatchQueue) {
-            monitor.start(queue: queue)
-            monitor.pathUpdateHandler = { [weak self] path in
-                _ = self?.subscriber?.receive(path)
-            }
+            downstream = nil
         }
     }
 }

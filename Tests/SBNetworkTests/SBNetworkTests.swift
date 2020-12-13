@@ -2,6 +2,7 @@ import Combine
 import XCTest
 @testable import SBNetwork
 
+@available(iOS 13.0, *)
 final class NetworkTests: XCTestCase {
     
     private static var storage = Set<AnyCancellable>()
